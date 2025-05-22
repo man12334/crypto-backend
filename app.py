@@ -5,7 +5,7 @@ from flask_cors import CORS
 app = Flask(__name__)
 CORS(app)
 
-STEALTHEX_API_KEY = 'YOUR_API_KEY_HERE'  # Replace this with your real key
+STEALTHEX_API_KEY = '6915ba2c-6817-4bf0-b1cb-e1e7e2c21733'  # Replace this with your real key
 
 @app.route('/render-swap', methods=['POST'])
 def render_swap():
