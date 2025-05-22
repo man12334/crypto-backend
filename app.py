@@ -1,44 +1,25 @@
 from flask import Flask, request, jsonify
-import requests
 from flask_cors import CORS
 
 app = Flask(__name__)
-CORS(app)
+CORS(app)  # Enable CORS for all routes
 
-STEALTHEX_API_KEY = '6915ba2c-6817-4bf0-b1cb-e1e7e2c21733'  # Replace this with your real key
+@app.route('/')
+def home():
+    return "Crypto Swap API is running!"
 
 @app.route('/render-swap', methods=['POST'])
 def render_swap():
-    data = request.json
-    from_coin = data['from']
-    to_coin = data['to']
-    amount = float(data['amount'])
-    wallet = data['wallet']
+    data = request.get_json()
+    
+    # Get swap details
+    from_coin = data.get("from_coin")
+    to_coin = data.get("to_coin")
+    amount = data.get("amount")
+    wallet_address = data.get("wallet_address")
 
-    # Apply 5% fee
-    fee_amount = round(amount * 1.05, 8)
-
-    # Step 1: Get exchange info
-    response = requests.get(f'https://api.stealthex.io/api/v2/estimate-fixed-rate', params={
-        'fixed': 'true',
-        'currencyFrom': from_coin,
-        'currencyTo': to_coin,
-        'amountFrom': fee_amount,
-        'api_key': STEALTHEX_API_KEY
+    # Simple response for now
+    return jsonify({
+        "status": "success",
+        "message": f"Swapped {amount} {from_coin} to {to_coin} for wallet {wallet_address}"
     })
-
-    quote = response.json()
-    if not quote or 'estimatedAmount' not in quote[0]:
-        return jsonify({'error': 'Could not get estimate'}), 400
-
-    # Step 2: Create exchange
-    exchange = requests.post('https://api.stealthex.io/api/v2/exchange', json={
-        'fixed': True,
-        'currencyFrom': from_coin,
-        'currencyTo': to_coin,
-        'amountFrom': fee_amount,
-        'addressTo': wallet,
-        'api_key': STEALTHEX_API_KEY
-    })
-
-    return jsonify(exchange.json())
